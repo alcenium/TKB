@@ -1,34 +1,61 @@
 #! /bin/python3
 import tkinter as tk
+import sqlite3 as sq
 
-root = tk.Tk()
+class TKB(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        
+        self.title("TKB-12A1")
 
-master_frame1 = tk.Frame(root)
+        self.masterFrame = tk.Frame(self)
+        self.slaveFrame = tk.Frame(self.masterFrame)
 
-frame = tk.Frame(master_frame1)
-tk.Label(frame, text="<Tên ứng dụng>").grid(column=0, row=0)
-tk.Button(frame, text="Thoát", command=root.destroy).grid(column=1, row=0)
+# Phần tên và nút thoát
+        self.intro = tk.Frame(self.slaveFrame)
+        tk.Label(self.intro, text="TKB-12A1").grid(column=0, row=0)
+        tk.Button(self.intro, text="Thoát", command=self.destroy).grid(column=1, row=0)
+        self.intro.pack()
+# --------------------
 
-tk.Label(frame, text="Lớp:").grid(column=0, row=1)
-tk.Entry(frame).grid(column=1, row=1)
-tk.Label(frame, text="Môn học:").grid(column=0, row=2)
-tk.Entry(frame).grid(column=1, row=2)
+# Phần liệt kê lớp đã tạo
+        self.lietKe = tk.Frame(self.masterFrame)
+        tk.Label(self.lietKe, text="Các lớp đã tạo").pack(side=tk.TOP)
+        self.lb = tk.Listbox(self.lietKe)
+        self.lb.pack(side=tk.TOP)
+    # Nút xoá và chỉnh sửa bảng môn học cho lớp đang chọn
+        tk.Button(self.lietKe, text="Xoá", command=self.delete).pack(side=tk.RIGHT)
+        tk.Button(self.lietKe, text="Xem").pack(side=tk.LEFT)
+    # ---------------------------------------------------
+        self.lietKe.pack(side=tk.RIGHT)
+# -----------------------
 
-frame.grid(column=0, row=0)
+# Phần tạo lớp mới
+        self.lopHoc = tk.Frame(self.slaveFrame)
+        tk.Label(self.lopHoc, text="Tạo lớp:").grid(column=0, row=0)
+        self.inputLop = tk.Entry(self.lopHoc, width=10)
+        self.inputLop.grid(column=1, row=0)
+        tk.Button(self.lopHoc, text="Tạo", command=self.insert).grid(column=2, row=0)
+        self.lopHoc.pack()
+# ---------------
 
-second_frame = tk.Frame(master_frame1)
-tk.Button(second_frame, text="Tạo lớp").grid(column=0, row=1)
-tk.Button(second_frame, text="Tạo môn học").grid(column=1, row=1)
+        self.slaveFrame.pack(side=tk.LEFT)
+        self.masterFrame.pack()
 
-second_frame.grid(column=0, row=1)
-master_frame1.grid(column=0, row=0)
+# Functions
+    # Tạo lớp
+    # (Chỉ tạo khi tên không bị trùng)
+    def insert(self):
+        value = self.inputLop.get()
 
-master_frame2 = tk.Frame(root)
+        if len(value) > 0 and value not in self.lb.get(0, tk.END):
+            self.lb.insert('end', value)
 
-ten_lop = tk.Label(master_frame2, text="Các lớp đã tạo").pack(side=tk.TOP)
-lb_lop = tk.Listbox(master_frame2).pack(side=tk.TOP)
-xoa_lop = tk.Button(master_frame2, text="Xoá").pack(side=tk.LEFT)
-xem_lop = tk.Button(master_frame2, text="Xem").pack(side=tk.LEFT)
-master_frame2.grid(column=1, row=0)
+    # Xoá lớp
+    def delete(self):
+        self.lb.delete(self.lb.curselection())
+# ---------
 
-root.mainloop()
+if __name__ == "__main__":
+    tkb = TKB()
+    tkb.mainloop()
