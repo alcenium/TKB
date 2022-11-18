@@ -19,16 +19,45 @@ class TKB(tk.Tk):
         self.intro.pack()
 # --------------------
 
-# Phần liệt kê lớp đã tạo
+# Phần liệt kê môn học của lớp đang chọn
         self.lietKe = tk.Frame(self.masterFrame)
-        tk.Label(self.lietKe, text="Các lớp đã tạo").pack(side=tk.TOP)
-        self.lb = tk.Listbox(self.lietKe)
-        self.lb.pack(side=tk.TOP)
-    # Nút xoá và chỉnh sửa bảng môn học cho lớp đang chọn
-        tk.Button(self.lietKe, text="Xoá", command=self.deleteLop).pack(side=tk.RIGHT)
-        tk.Button(self.lietKe, text="Xem").pack(side=tk.LEFT)
-    # ---------------------------------------------------
+        tk.Label(self.lietKe, text="Môn học").grid(column=1, row=0)
+        self.lbMon = tk.Listbox(self.lietKe, width=27)
+        self.lbMon.grid(column=1, row=1)
+
+        self.inputSet = tk.Frame(self.lietKe)
+        tk.Label(self.inputSet, text="Tên môn - GV").grid(column=0, row=0)
+        inputMon = tk.Entry(self.inputSet, width=15).grid(column=0, row=1)
+
+        tk.Label(self.inputSet, text="Số tiết/tuần").grid(column=1, row=0)
+        soTiet = tk.Scale(self.inputSet, from_=1, to=10, orient=tk.HORIZONTAL, showvalue=2, tickinterval=2, resolution=1)
+        soTiet.grid(column=1, row=1)
+        self.inputSet.grid(column=1, row=2)
+
+
+# --------------------------------------
+
+# Phần liệt kê lớp đã tạo
+        tk.Label(self.lietKe, text="Liệt kê lớp").grid(column=0, row=0)
+        self.lbLop = tk.Listbox(self.lietKe)
+        self.lbLop.grid(column=0, row=1)
+
+        # Nút xoá và chỉnh sửa bảng môn học cho lớp đang chọn
+        self.buttons = tk.Frame(self.lietKe)
+        tk.Button(self.buttons, text="Xoá", command=self.deleteLop).pack(side=tk.RIGHT)
+        tk.Button(self.buttons, text="Xem").pack(side=tk.LEFT)
+        self.buttons.grid(column=0, row=2)
+        # ---------------------------------------------------
+
         self.lietKe.pack(side=tk.RIGHT)
+
+        # Đọc danh sách lớp từ CSDL
+        currentLop = self.listLop()
+        for lop in currentLop:
+            value = lop[0]
+            self.insert(value)
+        # ---------------------------
+
 # -----------------------
 
 # Phần tạo lớp mới
@@ -40,44 +69,53 @@ class TKB(tk.Tk):
         self.lopHoc.pack()
 # ---------------
 
-        currentLop = self.listLop()
-        for lop in currentLop:
-            value = lop[0]
-            self.insert(value)
-
         self.slaveFrame.pack(side=tk.LEFT)
         self.masterFrame.pack()
 
 # Functions
     # Tạo lớp
-    # (Chỉ tạo khi tên không bị trùng)
     def insert(self, value = None, fromDB = False):
         if value is None:
             value = self.inputLop.get()
 
-        if len(value) > 0 and value not in self.lb.get(0, tk.END):
-            self.lb.insert('end', value)
+        # (Chỉ tạo khi tên không bị trùng)
+        if len(value) > 0 and value not in self.lbLop.get(0, tk.END):
+            self.lbLop.insert('end', value)
 
         if fromDB is False:
             self.saveLop(value)
+    # -------------------------
 
     # Xoá lớp
     def deleteLop(self):
-        lopPos = self.lb.curselection()
-        lop = self.lb.get(lopPos)
+        lopPos = self.lbLop.curselection()
+        lop = self.lbLop.get(lopPos)
 
         self.runQuery("DROP TABLE \"{}\"".format(lop))
-        self.lb.delete(lopPos)
+        self.lbLop.delete(lopPos)
+    # ------------------------
 
+    # Lưu lớp vào CSDL
     def saveLop(self, lop):
         self.runQuery("CREATE TABLE IF NOT EXISTS \"{}\" (mon VARCHAR(30), soTiet INT)".format(lop))
+    # ------------------------
 
+    # Cập nhật bảng môn dựa theo lớp
+#    def updateMon(self):
+
+
+    # ------------------------------
+
+    # Liệt kê các bảng đang tồn tại trong CSDL
     def listLop(self):
         listLopQuery = "SELECT name FROM sqlite_master"
         listed = self.runQuery(listLopQuery, receive=True)
 
         return listed
+    # ------------------------
 
+
+    # "function" để giao tiếp với CSDL
     @staticmethod
     def runQuery(sql, data=None, receive=False):
         conn = sq.connect("TKB.db")
@@ -94,6 +132,7 @@ class TKB(tk.Tk):
             conn.commit()
 
         conn.close()
+    # -------------------------------
 
 # ---------
 
