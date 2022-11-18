@@ -100,6 +100,10 @@ class TKB(tk.Tk):
         create_tables = "CREATE TABLE tasks (task TEXT)"
         TKB.runQuery(create_tables)
 
+        default_task_query = "INSERT INTO tasks VALUES (?)"
+        default_task_data = ("--- Add Items Here ---",)
+        TKB.runQuery(default_task_query, default_task_data) 
+
 # ---------
 
 if __name__ == "__main__":
