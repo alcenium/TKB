@@ -95,15 +95,8 @@ class TKB(tk.Tk):
 
         conn.close()
 
-    @staticmethod
-    def firstTimeDB():
-        create_tables = "CREATE TABLE tasks (task TEXT)"
-        TKB.runQuery(create_tables)
-
 # ---------
 
 if __name__ == "__main__":
-    if not os.path.isfile("tasks.db"):
-        TKB.firstTimeDB()
     tkb = TKB()
     tkb.mainloop()
